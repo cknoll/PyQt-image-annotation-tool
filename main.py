@@ -11,6 +11,10 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QCheckBox, QFileDialo
     QRadioButton, QShortcut, QScrollArea, QVBoxLayout, QGroupBox, QFormLayout
 from xlsxwriter.workbook import Workbook
 
+from ipydex import IPS, activate_ips_on_exception
+activate_ips_on_exception()
+import confloader
+
 
 def get_img_paths(dir, extensions=('.jpg', '.png', '.jpeg')):
     '''
@@ -37,7 +41,7 @@ def make_folder(directory):
         os.makedirs(directory)
 
 
-class SetupWindow(QWidget):
+class SetupWindow(QWidget, confloader.Confloader):
     def __init__(self):
         super().__init__()
 
@@ -49,6 +53,8 @@ class SetupWindow(QWidget):
         self.selected_folder = ''
         self.selected_labels = ''
         self.num_labels = 0
+
+        # these are the input fields
         self.label_inputs = []
         self.label_headlines = []
         self.mode = 'csv'  # default option
@@ -88,6 +94,7 @@ class SetupWindow(QWidget):
 
         # Init
         self.init_ui()
+        self.load_config()
 
     def init_ui(self):
         # self.selectFolderDialog = QFileDialog.getExistingDirectory(self, 'Select directory')
@@ -146,6 +153,24 @@ class SetupWindow(QWidget):
                 self.setStyleSheet(fh.read())
         except:
             print("Can't load custom stylesheet.")
+
+    def load_config(self):
+        self.load_settings_from_toml()
+
+        self.selected_folder_label.setText(self.conf.selected_folder)
+        self.selected_folder = self.conf.selected_folder
+
+
+        labels = self.conf.label_headlines
+        self.numLabelsInput.setText(str(len(labels)))
+        self.generate_label_inputs()
+
+        # fill the input fileds with loaded labels
+        for input, label in zip(self.label_inputs, labels):
+            input.setText(label)
+
+        self.next_button.setFocus()
+
 
     def init_radio_buttons(self):
         """
@@ -307,8 +332,8 @@ class LabelerWindow(QWidget):
         self.width = 1100
         self.height = 770
         # img panal size should be square-like to prevent some problems with different aspect ratios
-        self.img_panel_width = 650
-        self.img_panel_height = 650
+        self.img_panel_width = 1000  # 650
+        self.img_panel_height = 1000  # 650
 
         # state variables
         self.counter = 0
@@ -426,7 +451,11 @@ class LabelerWindow(QWidget):
         # Create button for each label
         x_shift = 0  # variable that helps to compute x-coordinate of button in UI
         for i, label in enumerate(self.labels):
-            self.label_buttons.append(QtWidgets.QPushButton(label, self))
+            j = i + 1
+
+            button_text = f"({j}): {label}"
+
+            self.label_buttons.append(QtWidgets.QPushButton(button_text, self))
             button = self.label_buttons[i]
 
             # create click event (set label)
@@ -435,7 +464,7 @@ class LabelerWindow(QWidget):
 
             # create keyboard shortcut event (set label)
             # shortcuts start getting overwritten when number of labels >9
-            label_kbs = QShortcut(QKeySequence(f"{i+1 % 10}"), self)
+            label_kbs = QShortcut(QKeySequence(f"{j % 10}"), self)
             label_kbs.activated.connect(lambda x=label: self.set_label(x))
 
             # place button in GUI (create multiple columns if there is more than 10 button)
