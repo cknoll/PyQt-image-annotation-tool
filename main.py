@@ -29,6 +29,8 @@ def get_img_paths(dir, extensions=('.jpg', '.png', '.jpeg')):
         if filename.lower().endswith(extensions):
             img_paths.append(os.path.join(dir, filename))
 
+    img_paths.sort()
+
 
     if not img_paths:
         msg = f"no image found in {dir}"
@@ -340,11 +342,11 @@ class LabelerWindow(QWidget):
         zoom = 1.0
 
         # Window variables
-        self.width = int(800*zoom)
-        self.height = int(940*zoom)
+        self.width = int(50*zoom)
+        self.height = int(200*zoom)
         # img panel size should be square-like to prevent some problems with different aspect ratios
-        self.img_panel_width = int(1000*zoom)  # 650
-        self.img_panel_height = int(1000*zoom)  # 650
+        self.img_panel_width = int(650*zoom)  # 650
+        self.img_panel_height = int(650*zoom)  # 650
 
         # state variables
         self.counter = 0
