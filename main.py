@@ -22,8 +22,6 @@ def get_img_paths(dir, extensions=('.jpg', '.png', '.jpeg')):
     :param extensions: tuple with file endings. e.g. ('.jpg', '.png'). Files with these endings will be added to img_paths
     :return: list of all filenames
     '''
-    
-    dir = os.path.expanduser(dir)
 
     img_paths = []
 
@@ -51,9 +49,11 @@ class SetupWindow(QWidget, confloader.Confloader):
     def __init__(self):
         super().__init__()
 
+        self.load_settings_from_toml()
+
         # Window variables
-        self.width = 800
-        self.height = 940
+        self.width = self.conf.get("width", 800)
+        self.height = self.conf.get("height", 920)
 
         # State variables
         self.selected_folder = ''
@@ -100,6 +100,8 @@ class SetupWindow(QWidget, confloader.Confloader):
 
         # Init
         self.init_ui()
+
+        # distribute the values from the toml to other variables
         self.load_config()
 
     def init_ui(self):
@@ -165,7 +167,6 @@ class SetupWindow(QWidget, confloader.Confloader):
 
         self.selected_folder_label.setText(self.conf.selected_folder)
         self.selected_folder = self.conf.selected_folder
-
 
         labels = self.conf.label_headlines
         self.numLabelsInput.setText(str(len(labels)))
@@ -336,12 +337,12 @@ class LabelerWindow(QWidget):
         self.left = 200
         self.top = 100
 
-        zoom = 1.5
+        zoom = 1.0
 
         # Window variables
         self.width = int(800*zoom)
         self.height = int(940*zoom)
-        # img panal size should be square-like to prevent some problems with different aspect ratios
+        # img panel size should be square-like to prevent some problems with different aspect ratios
         self.img_panel_width = int(1000*zoom)  # 650
         self.img_panel_height = int(1000*zoom)  # 650
 

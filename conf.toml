@@ -2,6 +2,9 @@
 # selected_folder = "/home/ck/mnt/XAI-DIA-gl/Carsten/bilder_jpg2a/cropped/chunk001_shading_corrected"
 selected_folder = "~/XAI-DIA-bilder"
 
+width = 800
+height = 920
+
 numLabelsInput = 5
 
 label_headlines = [
