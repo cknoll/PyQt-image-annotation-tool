@@ -29,6 +29,10 @@ def get_img_paths(dir, extensions=('.jpg', '.png', '.jpeg')):
         if filename.lower().endswith(extensions):
             img_paths.append(os.path.join(dir, filename))
 
+
+    if not img_paths:
+        msg = f"no image found in {dir}"
+        raise FileNotFoundError(msg)
     return img_paths
 
 
@@ -329,11 +333,15 @@ class LabelerWindow(QWidget):
         self.title = 'PyQt5 - Annotation tool for assigning image classes'
         self.left = 200
         self.top = 100
-        self.width = 1100
-        self.height = 770
+
+        zoom = 1.5
+
+        # Window variables
+        self.width = int(800*zoom)
+        self.height = int(940*zoom)
         # img panal size should be square-like to prevent some problems with different aspect ratios
-        self.img_panel_width = 1000  # 650
-        self.img_panel_height = 1000  # 650
+        self.img_panel_width = int(1000*zoom)  # 650
+        self.img_panel_height = int(1000*zoom)  # 650
 
         # state variables
         self.counter = 0
@@ -344,6 +352,7 @@ class LabelerWindow(QWidget):
         self.num_images = len(self.img_paths)
         self.assigned_labels = {}
         self.mode = mode
+        self.btn_label_map = {}
 
         # initialize list to save all label buttons
         self.label_buttons = []
@@ -453,10 +462,15 @@ class LabelerWindow(QWidget):
         for i, label in enumerate(self.labels):
             j = i + 1
 
+            key = j % 10
+
             button_text = f"({j}): {label}"
 
             self.label_buttons.append(QtWidgets.QPushButton(button_text, self))
             button = self.label_buttons[i]
+
+            # this is used to colorize the buttons later:
+            self.btn_label_map[label] = button
 
             # create click event (set label)
             # https://stackoverflow.com/questions/35819538/using-lambda-expression-to-connect-slots-in-pyqt
@@ -464,8 +478,9 @@ class LabelerWindow(QWidget):
 
             # create keyboard shortcut event (set label)
             # shortcuts start getting overwritten when number of labels >9
-            label_kbs = QShortcut(QKeySequence(f"{j % 10}"), self)
+            label_kbs = QShortcut(QKeySequence(f"{key}"), self)
             label_kbs.activated.connect(lambda x=label: self.set_label(x))
+            print(label_kbs)
 
             # place button in GUI (create multiple columns if there is more than 10 button)
             y_shift = (30 + 10) * (i % 10)
@@ -480,6 +495,8 @@ class LabelerWindow(QWidget):
         Sets the label for just loaded image
         :param label: selected label
         """
+
+        print(f"{label=}")
 
         # get image filename from path (./data/images/img1.jpg → img1.jpg)
         img_path = self.img_paths[self.counter]
@@ -677,8 +694,9 @@ class LabelerWindow(QWidget):
         else:
             assigned_labels = []
 
-        for button in self.label_buttons:
-            if button.text() in assigned_labels:
+        for label, button in self.btn_label_map.items():
+
+            if label in assigned_labels:
                 button.setStyleSheet('border: 1px solid #43A047; background-color: #4CAF50; color: white')
             else:
                 button.setStyleSheet('background-color: None')
