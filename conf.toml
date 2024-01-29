@@ -1,5 +1,6 @@
 # selected_folder = "/home/ck/iee-ge/XAI-DIA/image_classification/PyQt-image-annotation-tool/tmp"
-selected_folder = "/home/ck/mnt/XAI-DIA-gl/Carsten/bilder_jpg2a/cropped/chunk001_shading_corrected"
+# selected_folder = "/home/ck/mnt/XAI-DIA-gl/Carsten/bilder_jpg2a/cropped/chunk001_shading_corrected"
+selected_folder = "~/XAI-DIA-bilder"
 
 numLabelsInput = 5
 

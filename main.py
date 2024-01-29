@@ -22,6 +22,8 @@ def get_img_paths(dir, extensions=('.jpg', '.png', '.jpeg')):
     :param extensions: tuple with file endings. e.g. ('.jpg', '.png'). Files with these endings will be added to img_paths
     :return: list of all filenames
     '''
+    
+    dir = os.path.expanduser(dir)
 
     img_paths = []
 
