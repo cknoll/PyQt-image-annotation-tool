@@ -68,11 +68,12 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.mode = 'csv'  # default option
 
         # Labels
-        self.headline_folder = QLabel('1. Select folder containing images you want to label', self)
-        self.headline_num_labels = QLabel('3. Specify labels', self)
-        self.labels_file_description = QLabel(
-            'a) select file with labels (text file containing one label on each line)', self)
-        self.labels_inputs_description = QLabel('b) or specify how many unique labels you want to assign', self)
+        self.user_name = QLabel('1. Name eingeben', self)
+        self.headline_folder = QLabel('2. Ordner auswählen', self)
+        # self.headline_num_labels = QLabel('3. Specify labels', self)
+        # self.labels_file_description = QLabel(
+        #     'a) select file with labels (text file containing one label on each line)', self)
+        # self.labels_inputs_description = QLabel('b) or specify how many unique labels you want to assign', self)
 
         # self.headline_num_labels = QLabel('3. How many unique labels do you want to assign?', self)
 
@@ -80,25 +81,26 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.error_message = QLabel(self)
 
         # Buttons
-        self.browse_button = QtWidgets.QPushButton("Browse", self)
-        self.confirm_num_labels = QtWidgets.QPushButton("Ok", self)
-        self.next_button = QtWidgets.QPushButton("Next", self)
-        self.browse_labels_button = QtWidgets.QPushButton("Select labels", self)
+        self.browse_button = QtWidgets.QPushButton("Durchsuchen", self)
+        # self.confirm_num_labels = QtWidgets.QPushButton("Ok", self)
+        self.next_button = QtWidgets.QPushButton("Weiter", self)
+        # self.browse_labels_button = QtWidgets.QPushButton("Select labels", self)
 
         # Inputs
-        self.numLabelsInput = QLineEdit(self)
+        self.nameInput = QLineEdit(self)
+        # self.numLabelsInput = QLineEdit(self)
 
         # Validation
-        self.onlyInt = QIntValidator()
+        # self.onlyInt = QIntValidator()
 
         #layouts
-        self.formLayout =QFormLayout()
+        # self.formLayout =QFormLayout()
 
         #GroupBoxs
-        self.groupBox = QGroupBox()
+        # self.groupBox = QGroupBox()
 
         #Scrolls
-        self.scroll = QScrollArea(self)
+        # self.scroll = QScrollArea(self)
 
         # Init
         self.init_ui()
@@ -112,49 +114,67 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.setGeometry(0, 0, self.width, self.height)
         self.centerOnScreen()
 
-        self.headline_folder.setGeometry(60, 30, 500, 20)
+
+        self.button_style = "color: black; font-size: 18pt;"
+        self.button_style_white = "color: white; font-size: 18pt;"
+
+        label_style = 'color: black; font-weight: bold; font-size: 18pt;'
+
+        self.user_name.setGeometry(60, 30, 400, 20)
+        self.user_name.setStyleSheet(label_style)
+        self.nameInput.setGeometry(60, 60, 550, 36)
+        self.nameInput.setStyleSheet(label_style)
+
+        self.headline_folder.setGeometry(60, 130, 500, 20)
         self.headline_folder.setObjectName("headline")
+        self.headline_folder.setStyleSheet(label_style)
 
-        self.selected_folder_label.setGeometry(60, 60, 550, 26)
+        self.selected_folder_label.setGeometry(60, 180, 550, 36)
         self.selected_folder_label.setObjectName("selectedFolderLabel")
+        self.selected_folder_label.setStyleSheet(label_style)
 
-        self.browse_button.setGeometry(611, 59, 80, 28)
+        self.browse_button.setGeometry(631, 180, 190, 36)
+        self.browse_button.setStyleSheet(label_style)
         self.browse_button.clicked.connect(self.pick_new)
 
         # Input number of labels
         top_margin_num_labels = 260
-        self.headline_num_labels.move(60, top_margin_num_labels)
-        self.headline_num_labels.setObjectName("headline")
+        # self.headline_num_labels.move(60, top_margin_num_labels)
+        # self.headline_num_labels.setObjectName("headline")
 
-        self.labels_file_description.move(60, top_margin_num_labels + 30)
+        # self.labels_file_description.move(60, top_margin_num_labels + 30)
         # self.browse_labels_button.setGeometry(60, top_margin_num_labels + 60, 80, 28)
-        self.browse_labels_button.setGeometry(520, top_margin_num_labels + 25, 89, 28)
+        # self.browse_labels_button.setGeometry(520, top_margin_num_labels + 25, 89, 28)
 
-        self.browse_labels_button.clicked.connect(self.pick_labels_file)
+        # self.browse_labels_button.clicked.connect(self.pick_labels_file)
 
         # self.labels_inputs_description.move(60, top_margin_num_labels + 100)
-        self.labels_inputs_description.move(60, top_margin_num_labels + 60)
+        # self.labels_inputs_description.move(60, top_margin_num_labels + 60)
         # self.numLabelsInput.setGeometry(60, top_margin_num_labels + 130, 60, 26)
-        self.numLabelsInput.setGeometry(75, top_margin_num_labels + 90, 60, 26)
+        # self.numLabelsInput.setGeometry(75, top_margin_num_labels + 90, 60, 26)
+        # self.nameInput.setValidator(self.onlyInt)
 
-        self.numLabelsInput.setValidator(self.onlyInt)
-        self.confirm_num_labels.setGeometry(136, top_margin_num_labels + 89, 80, 28)
-        self.confirm_num_labels.clicked.connect(self.generate_label_inputs)
+
+        # self.confirm_num_labels.setGeometry(136, top_margin_num_labels + 89, 80, 28)
+        # self.confirm_num_labels.clicked.connect(self.generate_label_inputs)
 
         # Next Button
-        self.next_button.move(360, 630)
-        self.next_button.clicked.connect(self.continue_app)
+        # self.next_button.move(360, 630)
+
+        self.next_button.setGeometry(320, 630, 100, 36)
+        self.next_button.setStyleSheet(self.button_style_white)
         self.next_button.setObjectName("blueButton")
+        self.next_button.clicked.connect(self.continue_app)
 
         # Erro message
         self.error_message.setGeometry(20, 810, self.width - 20, 20)
         self.error_message.setAlignment(Qt.AlignCenter)
         self.error_message.setStyleSheet('color: red; font-weight: bold')
 
-        self.init_radio_buttons()
+        # self.init_radio_buttons()
 
         #initiate the ScrollArea
-        self.scroll.setGeometry(60, 400, 300, 200)
+        # self.scroll.setGeometry(60, 400, 300, 200)
 
         # apply custom styles
         try:
@@ -170,8 +190,8 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.selected_folder_label.setText(self.conf.selected_folder)
         self.selected_folder = self.conf.selected_folder
 
-        labels = self.conf.label_headlines
-        self.numLabelsInput.setText(str(len(labels)))
+        self.conf_labels = labels = self.conf.label_headlines
+        # self.numLabelsInput.setText(str(len(labels)))
         self.generate_label_inputs()
 
         # fill the input fileds with loaded labels
@@ -255,10 +275,11 @@ class SetupWindow(QWidget, confloader.Confloader):
         """
 
         # check that number of labels is not empty
-        if self.numLabelsInput.text().strip() != '':
+        if 1 or self.numLabelsInput.text().strip() != '':
 
             # convert string (number of labels) to integer
-            self.num_labels = int(self.numLabelsInput.text())
+            # self.num_labels = int(self.numLabelsInput.text())
+            self.num_labels = len(self.conf_labels)
 
             # delete previously generated widgets
             for input, headline in zip(self.label_inputs, self.label_headlines):
@@ -271,19 +292,20 @@ class SetupWindow(QWidget, confloader.Confloader):
             margin_top = 400
 
             # show headline for this step
-            self.groupBox.setTitle('4. Fill in the labels and click "Next"')
-            self.groupBox.setStyleSheet('font-weight: bold')
+            # self.groupBox.setTitle('4. Fill in the labels and click "Next"')
+            # self.groupBox.setStyleSheet('font-weight: bold')
 
             # diplsay input fields
             for i in range(self.num_labels):
+                break
                 # append widgets to lists
                 self.label_inputs.append(QtWidgets.QLineEdit(self))
                 self.label_headlines.append(QLabel(f'label {i + 1}:', self))
-                self.formLayout.addRow(self.label_headlines[i], self.label_inputs[i])
+                # self.formLayout.addRow(self.label_headlines[i], self.label_inputs[i])
 
-            self.groupBox.setLayout(self.formLayout)
-            self.scroll.setWidget(self.groupBox)
-            self.scroll.setWidgetResizable(True)
+            # self.groupBox.setLayout(self.formLayout)
+            # self.scroll.setWidget(self.groupBox)
+            # self.scroll.setWidgetResizable(True)
     def centerOnScreen(self):
         """
         Centers the window on the screen.
@@ -299,9 +321,11 @@ class SetupWindow(QWidget, confloader.Confloader):
         if self.selected_folder == '':
             return False, 'Input folder has to be selected (step 1)'
 
-        num_labels_input = self.numLabelsInput.text().strip()
-        if num_labels_input == '' or num_labels_input == '0':
-            return False, 'Number of labels has to be number greater than 0 (step 3).'
+        # num_labels_input = self.numLabelsInput.text().strip()
+        # if num_labels_input == '' or num_labels_input == '0':
+        #     return False, 'Number of labels has to be number greater than 0 (step 3).'
+
+        return True, "Form Ok."
 
         if len(self.label_inputs) == 0:
             return False, "You didn't provide any labels. Select number of labels and press \"Ok\""
@@ -319,9 +343,9 @@ class SetupWindow(QWidget, confloader.Confloader):
         form_is_valid, message = self.check_validity()
 
         if form_is_valid:
-            label_values = []
-            for label in self.label_inputs:
-                label_values.append(label.text().strip())
+            label_values = self.conf.label_headlines
+            # for label in self.label_inputs:
+            #     label_values.append(label.text().strip())
 
             self.close()
             # show window in full-screen mode (window is maximized)
@@ -338,6 +362,10 @@ class LabelerWindow(QWidget):
         self.title = 'PyQt5 - Annotation tool for assigning image classes'
         self.left = 200
         self.top = 100
+
+
+        self.button_style = "color: black; font-size: 18pt;"
+        self.button_style_white = "color: white; font-size: 18pt;"
 
         zoom = 1.0
 
@@ -370,7 +398,7 @@ class LabelerWindow(QWidget):
         self.csv_note = QLabel('(csv will be also generated automatically after closing the app)', self)
         self.csv_generated_message = QLabel(self)
         self.show_next_checkbox = QCheckBox("Automatically show next image when labeled", self)
-        self.generate_xlsx_checkbox = QCheckBox("Also generate .xlsx file", self)
+        # self.generate_xlsx_checkbox = QCheckBox("Also generate .xlsx file", self)
 
         # create label folders
         if mode == 'copy' or mode == 'move':
@@ -393,8 +421,8 @@ class LabelerWindow(QWidget):
         self.show_next_checkbox.setGeometry(self.img_panel_width + 20, 10, 400, 20)
 
         # "create xlsx" checkbox
-        self.generate_xlsx_checkbox.setChecked(False)
-        self.generate_xlsx_checkbox.setGeometry(self.img_panel_width + 140, 606, 300, 20)
+        # self.generate_xlsx_checkbox.setChecked(False)
+        # self.generate_xlsx_checkbox.setGeometry(self.img_panel_width + 140, 606, 300, 20)
 
         # image headline
         self.curr_image_headline.setGeometry(20, 10, 300, 20)
@@ -444,10 +472,12 @@ class LabelerWindow(QWidget):
         prev_im_btn = QtWidgets.QPushButton("Prev", self)
         prev_im_btn.move(self.img_panel_width + 20, next_prev_top_margin)
         prev_im_btn.clicked.connect(self.show_prev_image)
+        prev_im_btn.setStyleSheet(self.button_style)
 
         next_im_btn = QtWidgets.QPushButton("Next", self)
         next_im_btn.move(self.img_panel_width + 140, next_prev_top_margin)
         next_im_btn.clicked.connect(self.show_next_image)
+        next_im_btn.setStyleSheet(self.button_style)
 
         # Add "Prev Image" and "Next Image" keyboard shortcuts
         prev_im_kbs = QShortcut(QKeySequence("left"), self)
@@ -457,10 +487,11 @@ class LabelerWindow(QWidget):
         next_im_kbs.activated.connect(self.show_next_image)
 
         # Add "generate csv file" button
-        next_im_btn = QtWidgets.QPushButton("Generate csv", self)
-        next_im_btn.move(self.img_panel_width + 20, 600)
+        next_im_btn = QtWidgets.QPushButton("CSV speichern", self)
+        next_im_btn.move(self.img_panel_width + 20, 700)
         next_im_btn.clicked.connect(lambda state, filename='assigned_classes': self.generate_csv(filename))
         next_im_btn.setObjectName("blueButton")
+        next_im_btn.setStyleSheet(self.button_style_white)
 
         # Create button for each label
         x_shift = 0  # variable that helps to compute x-coordinate of button in UI
@@ -476,6 +507,7 @@ class LabelerWindow(QWidget):
 
             # this is used to colorize the buttons later:
             self.btn_label_map[label] = button
+            button.setStyleSheet(self.button_style)
 
             # create click event (set label)
             # https://stackoverflow.com/questions/35819538/using-lambda-expression-to-connect-slots-in-pyqt
@@ -488,7 +520,7 @@ class LabelerWindow(QWidget):
             print(label_kbs)
 
             # place button in GUI (create multiple columns if there is more than 10 button)
-            y_shift = (30 + 10) * (i % 10)
+            y_shift = (30 + 20) * (i % 10)
             if (i != 0 and i % 10 == 0):
                 x_shift += 120
                 y_shift = 0
@@ -666,7 +698,7 @@ class LabelerWindow(QWidget):
         self.csv_generated_message.setText(message)
         print(message)
 
-        if self.generate_xlsx_checkbox.isChecked():
+        if 0 and self.generate_xlsx_checkbox.isChecked():
             try:
                 self.csv_to_xlsx(csv_file_path)
             except:
@@ -702,9 +734,9 @@ class LabelerWindow(QWidget):
         for label, button in self.btn_label_map.items():
 
             if label in assigned_labels:
-                button.setStyleSheet('border: 1px solid #43A047; background-color: #4CAF50; color: white')
+                button.setStyleSheet(self.button_style + ' border: 1px solid #43A047; background-color: #4CAF50; color: white')
             else:
-                button.setStyleSheet('background-color: None')
+                button.setStyleSheet(self.button_style + ' background-color: None')
 
     def closeEvent(self, event):
         """
