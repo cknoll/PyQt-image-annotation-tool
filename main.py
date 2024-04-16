@@ -394,10 +394,10 @@ class LabelerWindow(QWidget):
         self.image_box = QLabel(self)
         self.img_name_label = QLabel(self)
         self.progress_bar = QLabel(self)
-        self.curr_image_headline = QLabel('Current image', self)
-        self.csv_note = QLabel('(csv will be also generated automatically after closing the app)', self)
+        self.curr_image_headline = QLabel('Aktuelles Bild', self)
+        self.csv_note = QLabel('Bitte auch Stäbchen annotieren, die leicht auffällig sind aber nicht ausgeschleust werden müssten.\nWenn keine Auffälligkeit zu sehen ist, dann keine Fehlerklasse markieren.', self)
         self.csv_generated_message = QLabel(self)
-        self.show_next_checkbox = QCheckBox("Automatically show next image when labeled", self)
+        self.show_next_checkbox = QCheckBox("Automatisch nächstes Bild anzeigen nach dem Annotieren", self)
         # self.generate_xlsx_checkbox = QCheckBox("Also generate .xlsx file", self)
 
         # create label folders
@@ -435,7 +435,7 @@ class LabelerWindow(QWidget):
         self.progress_bar.setGeometry(20, 65, self.img_panel_width, 20)
 
         # csv note
-        self.csv_note.setGeometry(self.img_panel_width + 20, 640, 400, 20)
+        self.csv_note.setGeometry(self.img_panel_width + 20, 640, 560, 40)
 
         # message that csv was generated
         self.csv_generated_message.setGeometry(self.img_panel_width + 20, 660, 800, 20)
@@ -450,7 +450,7 @@ class LabelerWindow(QWidget):
         self.img_name_label.setText(self.img_paths[self.counter])
 
         # progress bar
-        self.progress_bar.setText(f'image 1 of {self.num_images}')
+        self.progress_bar.setText(f'Bild 1 von {self.num_images}')
 
         # draw line to for better UX
         ui_line = QLabel(self)
@@ -488,7 +488,7 @@ class LabelerWindow(QWidget):
 
         # Add "generate csv file" button
         next_im_btn = QtWidgets.QPushButton("CSV speichern", self)
-        next_im_btn.move(self.img_panel_width + 20, 700)
+        next_im_btn.move(self.img_panel_width + 20, 750)
         next_im_btn.clicked.connect(lambda state, filename='assigned_classes': self.generate_csv(filename))
         next_im_btn.setObjectName("blueButton")
         next_im_btn.setStyleSheet(self.button_style_white)
@@ -618,7 +618,7 @@ class LabelerWindow(QWidget):
 
             self.set_image(path)
             self.img_name_label.setText(path)
-            self.progress_bar.setText(f'image {self.counter + 1} of {self.num_images}')
+            self.progress_bar.setText(f'Bild {self.counter + 1} von {self.num_images}')
             self.set_button_color(filename)
             self.csv_generated_message.setText('')
 
@@ -646,7 +646,7 @@ class LabelerWindow(QWidget):
 
                 self.set_image(path)
                 self.img_name_label.setText(path)
-                self.progress_bar.setText(f'image {self.counter + 1} of {self.num_images}')
+                self.progress_bar.setText(f'Bild {self.counter + 1} von {self.num_images}')
 
                 self.set_button_color(filename)
                 self.csv_generated_message.setText('')
