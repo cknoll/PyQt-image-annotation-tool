@@ -418,7 +418,7 @@ class LabelerWindow(QWidget):
 
         # create 'show next automatically' checkbox
         self.show_next_checkbox.setChecked(False)
-        self.show_next_checkbox.setGeometry(self.img_panel_width + 20, 10, 400, 20)
+        self.show_next_checkbox.setGeometry(self.img_panel_width + 20, 10, 550, 20)
 
         # "create xlsx" checkbox
         # self.generate_xlsx_checkbox.setChecked(False)
