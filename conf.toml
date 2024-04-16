@@ -2,20 +2,18 @@
 # selected_folder = "/home/ck/mnt/XAI-DIA-gl/Carsten/bilder_jpg2a/cropped/chunk001_shading_corrected"
 selected_folder = "~/XAI-DIA-bilder"
 
-width = 800
+width = 1000
 height = 920
 
 numLabelsInput = 5
 
 label_headlines = [
-    "C1 zart-heller Fleck, flächig",
-    "C2 durchscheinende Füllung",
-    "C3 Deckelfehler örtlich konzentriert",
-    "C4 Bläßchen",
-    "C5 Defekt am Rand",
-    "C6 Deckel beschädigt",
-    "C7 anderer Fehler",
-    "C8 Falsches Zellenbild",
-    "C9 Fremdobjekt",
-    "C0 kein Fehler",
+    "leichte durchscheinende Füllung",
+    "mittlere durchscheinende Füllung",
+    "starke durchscheinende Füllung",
+    "Bläßchen",
+    "Füllung über Rand hinaus",
+    "Kratzer/Späne auf Deckel ",
+    "Zelle falsch erkannt",
+    "sonstiger Fehler",
 ]
