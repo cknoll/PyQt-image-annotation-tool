@@ -395,7 +395,7 @@ class LabelerWindow(QWidget):
         self.img_name_label = QLabel(self)
         self.progress_bar = QLabel(self)
         self.curr_image_headline = QLabel('Aktuelles Bild', self)
-        self.csv_note = QLabel('Bitte auch Stäbchen annotieren, die leicht auffällig sind aber nicht ausgeschleust werden müssten.\nWenn keine Auffälligkeit zu sehen ist, dann keine Fehlerklasse markieren.', self)
+        self.csv_note = QLabel('Bitte auch Stäbchen annotieren, die leicht auffällig sind aber nicht\nausgeschleust werden müssten.\n\nWenn keine Auffälligkeit zu sehen ist, dann keine Fehlerklasse markieren.', self)
         self.csv_generated_message = QLabel(self)
         self.show_next_checkbox = QCheckBox("Automatisch nächstes Bild anzeigen nach dem Annotieren", self)
         # self.generate_xlsx_checkbox = QCheckBox("Also generate .xlsx file", self)
@@ -435,7 +435,7 @@ class LabelerWindow(QWidget):
         self.progress_bar.setGeometry(20, 65, self.img_panel_width, 20)
 
         # csv note
-        self.csv_note.setGeometry(self.img_panel_width + 20, 640, 560, 40)
+        self.csv_note.setGeometry(self.img_panel_width + 20, 640, 560, 80)
 
         # message that csv was generated
         self.csv_generated_message.setGeometry(self.img_panel_width + 20, 660, 800, 20)
