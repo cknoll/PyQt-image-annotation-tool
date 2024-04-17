@@ -214,7 +214,7 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.load_settings_from_toml()
 
         self.selected_folder_label.setText(ds.path)
-        self.selected_folder = self.conf.selected_folder
+        self.selected_folder = ds.path
 
         self.conf_labels = labels = self.conf.label_headlines
         # self.numLabelsInput.setText(str(len(labels)))
@@ -224,7 +224,24 @@ class SetupWindow(QWidget, confloader.Confloader):
         for input, label in zip(self.label_inputs, labels):
             input.setText(label)
 
-        self.next_button.setFocus()
+        self.nameInput.setFocus()
+        self.nameInput.keyPressEvent = self.catch_enter(self.nameInput.keyPressEvent, self.activate_next_button)
+        self.next_button.keyPressEvent = self.catch_enter(self.next_button.keyPressEvent, self.click_next_button)
+
+    def catch_enter(self, orig_event_handler, on_enter_func):
+        def new_event_handler(e):
+            orig_event_handler(e)
+            if e.key()  in(Qt.Key_Return, Qt.Key_Enter):
+                on_enter_func()
+        return new_event_handler
+
+    def activate_next_button(self):
+        if self.nameInput.text():
+            self.next_button.setFocus()
+            self.next_button.setStyleSheet(f"{self.button_style_white_bg_blue} border: 1px solid blue;")
+
+    def click_next_button(self):
+        self.continue_app()
 
 
     def init_radio_buttons(self):
@@ -287,7 +304,6 @@ class SetupWindow(QWidget, confloader.Confloader):
 
             labels = [line.rstrip('\n') for line in content]
 
-            print(labels)
             self.numLabelsInput.setText(str(len(labels)))
             self.generate_label_inputs()
 
@@ -375,13 +391,15 @@ class SetupWindow(QWidget, confloader.Confloader):
 
             self.close()
             # show window in full-screen mode (window is maximized)
-            LabelerWindow(label_values, self.selected_folder, self.mode).showMaximized()
+            LabelerWindow(label_values, self.selected_folder, self.nameInput.text()).showMaximized()
         else:
             self.error_message.setText(message)
 
 
 class LabelerWindow(QWidget):
-    def __init__(self, labels, input_folder, mode):
+    def __init__(self, labels, input_folder, username):
+        self.username = username
+        mode = "csv"
         super().__init__()
 
         # init UI state
