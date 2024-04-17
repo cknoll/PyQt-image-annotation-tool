@@ -1,3 +1,19 @@
+This repo contains a version of *PyQt Image Annotation Tool* which is adapted to special needs of the XAI-DIA project.
+
+example usage:
+
+- `python main.py`  – load data from the directory configured in conf.toml
+- `python main.py --data ~/XAI-DIA-bilder/gruppe001` – explicitly specify the directory
+
+
+---
+---
+
+Below is the content of the original README
+
+---
+---
+
 # PyQt Image Annotation Tool
 
 This app is used to label images in a given directory.

@@ -1,10 +1,13 @@
 # selected_folder = "/home/ck/iee-ge/XAI-DIA/image_classification/PyQt-image-annotation-tool/tmp"
 # selected_folder = "/home/ck/mnt/XAI-DIA-gl/Carsten/bilder_jpg2a/cropped/chunk001_shading_corrected"
+
+# this might be overriden by the command line option `--data`
 selected_folder = "~/XAI-DIA-bilder"
 
 width = 1000
 height = 920
 
+# this is obsolete
 numLabelsInput = 5
 
 label_headlines = [

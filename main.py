@@ -8,7 +8,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIntValidator, QKeySequence
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QCheckBox, QFileDialog, QDesktopWidget, QLineEdit, \
-    QRadioButton, QShortcut, QScrollArea, QVBoxLayout, QGroupBox, QFormLayout
+    QRadioButton, QShortcut, QMessageBox
 from xlsxwriter.workbook import Workbook
 
 from ipydex import IPS, activate_ips_on_exception
@@ -45,6 +45,9 @@ def make_folder(directory):
     """
     if not os.path.exists(directory):
         os.makedirs(directory)
+
+# global data storage:
+ds = confloader.Container()
 
 
 class SetupWindow(QWidget, confloader.Confloader):
@@ -120,20 +123,20 @@ class SetupWindow(QWidget, confloader.Confloader):
 
         label_style = 'color: black; font-weight: bold; font-size: 18pt;'
 
-        self.user_name.setGeometry(60, 30, 400, 20)
+        self.user_name.setGeometry(60, 30, 400, 35)
         self.user_name.setStyleSheet(label_style)
-        self.nameInput.setGeometry(60, 60, 550, 36)
+        self.nameInput.setGeometry(60, 70, 550, 36)
         self.nameInput.setStyleSheet(label_style)
 
-        self.headline_folder.setGeometry(60, 130, 500, 20)
+        self.headline_folder.setGeometry(60, 150, 500, 20)
         self.headline_folder.setObjectName("headline")
         self.headline_folder.setStyleSheet(label_style)
 
-        self.selected_folder_label.setGeometry(60, 180, 550, 36)
+        self.selected_folder_label.setGeometry(60, 200, 550, 36)
         self.selected_folder_label.setObjectName("selectedFolderLabel")
         self.selected_folder_label.setStyleSheet(label_style)
 
-        self.browse_button.setGeometry(631, 180, 190, 36)
+        self.browse_button.setGeometry(631, 200, 190, 36)
         self.browse_button.setStyleSheet(label_style)
         self.browse_button.clicked.connect(self.pick_new)
 
@@ -769,9 +772,49 @@ class LabelerWindow(QWidget):
         for label in labels:
             make_folder(os.path.join(folder, label))
 
+def handle_cli_data_folder(sys_argv: list):
+    """
+    process sys.argv and set relevant variables of global data storage ds.
+    """
+
+    ds.cli_errors = []
+    fallback = True
+
+    cl = confloader.Confloader()
+    cl.load_settings_from_toml()
+
+
+    if "--data" in sys_argv:
+        idx1 = sys_argv.index("--data")
+        sys_argv.pop(idx1)
+        try:
+            ds.path = sys_argv.pop(idx1)
+        except IndexError:
+            ds.cli_errors.append("Could not detect path argument after option `--data`")
+            ds.path = None
+        if ds.path and os.path.isdir(ds.path):
+            fallback = False
+        else:
+            ds.cli_errors.append(f"Could not find path: {ds.path}")
+    if fallback:
+        ds.path = cl.conf.selected_folder
+
+def show_errors(errors: list):
+
+    app = QApplication([])
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    errmsg = '\n'.join(errors)
+    msg.setText(f"The following errors occurred: \n\n{errmsg}")
+    msg.setWindowTitle("Error")
+    sys.exit(msg.exec_())
+
 
 if __name__ == '__main__':
     # run the application
+    handle_cli_data_folder(sys.argv)
+    if ds.cli_errors:
+        show_errors(ds.cli_errors)
     app = QApplication(sys.argv)
     ex = SetupWindow()
     ex.show()
