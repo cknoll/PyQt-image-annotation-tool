@@ -6,7 +6,7 @@ import sys
 import numpy as np
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QIntValidator, QKeySequence
+from PyQt5.QtGui import QPixmap, QKeySequence, QValidator
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QCheckBox, QFileDialog, QDesktopWidget, QLineEdit, \
     QRadioButton, QShortcut, QMessageBox
 from xlsxwriter.workbook import Workbook
@@ -96,6 +96,8 @@ class SetupWindow(QWidget, confloader.Confloader):
         # Validation
         # self.onlyInt = QIntValidator()
 
+        self.nameInput.textChanged.connect(self.name_changed)
+
         #layouts
         # self.formLayout =QFormLayout()
 
@@ -111,15 +113,36 @@ class SetupWindow(QWidget, confloader.Confloader):
         # distribute the values from the toml to other variables
         self.load_config()
 
+    def name_changed(self, name):
+
+        # s contains the text of the line edit, we could also test self.lineedit.text()
+
+        if name:
+            self.set_next_button_activation(True)
+            self.next_button.setStyleSheet(self.button_style_white_bg_blue)
+        else:
+            self.set_next_button_activation(False)
+            self.next_button.setStyleSheet(self.button_style_white_bg_gray)
+
+    def set_next_button_activation(self, active):
+
+        if active:
+            self.next_button.setDisabled(False)
+        else:
+            self.next_button.setDisabled(True)
+
+
     def init_ui(self):
         # self.selectFolderDialog = QFileDialog.getExistingDirectory(self, 'Select directory')
+        self.set_next_button_activation(False)
         self.setWindowTitle('PyQt5 - Annotation tool - Parameters setup')
         self.setGeometry(0, 0, self.width, self.height)
         self.centerOnScreen()
 
 
         self.button_style = "color: black; font-size: 18pt;"
-        self.button_style_white = "color: white; font-size: 18pt;"
+        self.button_style_white_bg_gray = "color: white; font-size: 18pt; background-color: #999;"
+        self.button_style_white_bg_blue = "color: white; font-size: 18pt; background-color: #1E88E5;"
 
         label_style = 'color: black; font-weight: bold; font-size: 18pt;'
 
@@ -165,8 +188,8 @@ class SetupWindow(QWidget, confloader.Confloader):
         # self.next_button.move(360, 630)
 
         self.next_button.setGeometry(320, 630, 100, 36)
-        self.next_button.setStyleSheet(self.button_style_white)
-        self.next_button.setObjectName("blueButton")
+        self.next_button.setStyleSheet(self.button_style_white_bg_gray)
+        # self.next_button.setObjectName("blueButton")
         self.next_button.clicked.connect(self.continue_app)
 
         # Erro message
@@ -190,7 +213,7 @@ class SetupWindow(QWidget, confloader.Confloader):
     def load_config(self):
         self.load_settings_from_toml()
 
-        self.selected_folder_label.setText(self.conf.selected_folder)
+        self.selected_folder_label.setText(ds.path)
         self.selected_folder = self.conf.selected_folder
 
         self.conf_labels = labels = self.conf.label_headlines

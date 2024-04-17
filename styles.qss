@@ -6,6 +6,7 @@ QPushButton#blueButton {
     min-width: 80px
 }
 
+
 QPushButton#blueButton:hover {
     background-color: #1976D2;
 }
@@ -23,7 +24,3 @@ border: 1px solid #aaa
 QLabel#headline {
 font-weight: bold;
 }
-
-
-
-
