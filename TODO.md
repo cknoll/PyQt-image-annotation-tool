@@ -1,0 +1,4 @@
+- command line option for target-directory
+- name checking
+- finished message
+- email

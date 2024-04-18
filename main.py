@@ -2,6 +2,8 @@ import csv
 import os
 import shutil
 import sys
+import time
+import json
 
 import numpy as np
 from PyQt5 import QtWidgets
@@ -71,7 +73,7 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.mode = 'csv'  # default option
 
         # Labels
-        self.user_name = QLabel('1. Name eingeben', self)
+        self.username = QLabel('1. Name eingeben', self)
         self.headline_folder = QLabel('2. Ordner auswählen', self)
         # self.headline_num_labels = QLabel('3. Specify labels', self)
         # self.labels_file_description = QLabel(
@@ -146,8 +148,8 @@ class SetupWindow(QWidget, confloader.Confloader):
 
         label_style = 'color: black; font-weight: bold; font-size: 18pt;'
 
-        self.user_name.setGeometry(60, 30, 400, 35)
-        self.user_name.setStyleSheet(label_style)
+        self.username.setGeometry(60, 30, 400, 35)
+        self.username.setStyleSheet(label_style)
         self.nameInput.setGeometry(60, 70, 550, 36)
         self.nameInput.setStyleSheet(label_style)
 
@@ -399,6 +401,7 @@ class SetupWindow(QWidget, confloader.Confloader):
 class LabelerWindow(QWidget):
     def __init__(self, labels, input_folder, username):
         self.username = username
+        self.timestamp_start = time.strftime("%Y-%m-%d %H:%M:%S")
         mode = "csv"
         super().__init__()
 
@@ -410,6 +413,7 @@ class LabelerWindow(QWidget):
 
         self.button_style = "color: black; font-size: 18pt;"
         self.button_style_white = "color: white; font-size: 18pt;"
+        self.label_style_red18 = 'color: red; font-weight: bold; font-size: 18pt;'
 
         zoom = 1.0
 
@@ -436,11 +440,12 @@ class LabelerWindow(QWidget):
 
         # Initialize Labels
         self.image_box = QLabel(self)
+        self.last_img_hint = QLabel("", self)
         self.img_name_label = QLabel(self)
         self.progress_bar = QLabel(self)
-        self.curr_image_headline = QLabel('Aktuelles Bild', self)
-        self.csv_note = QLabel('Bitte auch Fehler benennen, die leicht auffällig sind aber nicht\nausgeschleust werden müssten.\n\nWenn keine Auffälligkeit zu sehen ist, dann keine Fehlerklasse markieren.', self)
-        self.csv_generated_message = QLabel(self)
+        self.curr_image_headline = QLabel(f"Nutzer: {self.username}", self)
+        self.csv_note = QLabel('Bitte auch Fehler benennen, die leicht auffällig sind, aber nicht\nausgeschleust werden müssten.\n\nWenn keine Auffälligkeit zu sehen ist, dann keine Fehlerklasse markieren.', self)
+        self.csv_generated_message = QLabel(self) # will contain "csv saved to ..."
         self.show_next_checkbox = QCheckBox("Automatisch nächstes Bild anzeigen nach dem Annotieren", self)
         # self.generate_xlsx_checkbox = QCheckBox("Also generate .xlsx file", self)
 
@@ -479,10 +484,10 @@ class LabelerWindow(QWidget):
         self.progress_bar.setGeometry(20, 65, self.img_panel_width, 20)
 
         # csv note
-        self.csv_note.setGeometry(self.img_panel_width + 20, 640, 560, 80)
+        self.csv_note.setGeometry(self.img_panel_width + 20, 540, 560, 80)
 
         # message that csv was generated
-        self.csv_generated_message.setGeometry(self.img_panel_width + 20, 660, 800, 20)
+        self.csv_generated_message.setGeometry(self.img_panel_width + 20, 700, 600, 40)
         self.csv_generated_message.setStyleSheet('color: #43A047')
 
         # show image
@@ -531,11 +536,14 @@ class LabelerWindow(QWidget):
         next_im_kbs.activated.connect(self.show_next_image)
 
         # Add "generate csv file" button
-        next_im_btn = QtWidgets.QPushButton("CSV speichern", self)
-        next_im_btn.move(self.img_panel_width + 20, 750)
-        next_im_btn.clicked.connect(lambda state, filename='assigned_classes': self.generate_csv(filename))
-        next_im_btn.setObjectName("blueButton")
-        next_im_btn.setStyleSheet(self.button_style_white)
+        save_res_btn = QtWidgets.QPushButton("CSV speichern", self)
+        save_res_btn.move(self.img_panel_width + 20, 750)
+        save_res_btn.clicked.connect(lambda state, filename='assigned_classes': self.generate_csv(filename))
+        save_res_btn.setObjectName("blueButton")
+        save_res_btn.setStyleSheet(self.button_style_white)
+
+        self.last_img_hint.setGeometry(self.img_panel_width + 20, 650, 650, 30)
+        self.last_img_hint.setStyleSheet(self.label_style_red18)
 
         # Create button for each label
         x_shift = 0  # variable that helps to compute x-coordinate of button in UI
@@ -649,26 +657,31 @@ class LabelerWindow(QWidget):
         """
         loads and shows next image in dataset
         """
+
         if self.counter < self.num_images - 1:
             self.counter += 1
 
-            path = self.img_paths[self.counter]
-            filename = os.path.split(path)[-1]
+        print(f"{self.counter=}")
 
-            # If we have already assigned label to this image and mode is 'move', change the input path.
-            # The reason is that the image was moved from '.../input_folder' to '.../input_folder/label'
-            if self.mode == 'move' and filename in self.assigned_labels.keys():
-                path = os.path.join(self.input_folder, self.assigned_labels[filename][0], filename)
+        path = self.img_paths[self.counter]
+        filename = os.path.split(path)[-1]
+        print("{filename=}")
 
-            self.set_image(path)
-            self.img_name_label.setText(path)
-            self.progress_bar.setText(f'Bild {self.counter + 1} von {self.num_images}')
-            self.set_button_color(filename)
+        self.set_image(path)
+        self.img_name_label.setText(path)
+        self.progress_bar.setText(f'Bild {self.counter + 1} von {self.num_images}')
+        self.set_button_color(filename)
+
+        if self.counter < self.num_images - 1:
+            # not the last image
             self.csv_generated_message.setText('')
+            return
 
+        # if this is the last image in dataset
+        if self.counter == self.num_images - 1:
+            self.last_img_hint.setText("Letztes Bild erreicht. Bitte CSV-Datei speichern.")
 
-        # change button color if this is last image in dataset
-        elif self.counter == self.num_images - 1:
+            # change button color (make choice visible)
             path = self.img_paths[self.counter]
             self.set_button_color(os.path.split(path)[-1])
 
@@ -680,6 +693,7 @@ class LabelerWindow(QWidget):
             self.counter -= 1
 
             if self.counter < self.num_images:
+                self.last_img_hint.setText("")
                 path = self.img_paths[self.counter]
                 filename = os.path.split(path)[-1]
 
@@ -738,7 +752,17 @@ class LabelerWindow(QWidget):
                 labels_one_hot = self.labels_to_zero_one(labels)
                 writer.writerow([img_name] + list(labels_one_hot))
 
-        message = f'csv saved to: {csv_file_path}'
+        metadata_path = os.path.join(path_to_save, "metadata.json")
+
+        metadata = {
+            "username": self.username,
+            "timestamp_start": self.timestamp_start,
+            "timestamp_save": time.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        with open(metadata_path, "w", encoding='utf-8') as fp:
+            json.dump(metadata, fp, ensure_ascii=False, indent=4)
+
+        message = f'CSV-Datei erfolgreich gespeichert:\n{csv_file_path}'
         self.csv_generated_message.setText(message)
         print(message)
 
