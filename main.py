@@ -51,6 +51,7 @@ def make_folder(directory):
 # global data storage:
 ds = confloader.Container()
 ds.path_specified_via_cli = None
+ds.last_folder_name = None
 
 
 class SetupWindow(QWidget, confloader.Confloader):
@@ -84,6 +85,7 @@ class SetupWindow(QWidget, confloader.Confloader):
         # self.headline_num_labels = QLabel('3. How many unique labels do you want to assign?', self)
 
         self.selected_folder_label = QLabel(self)
+        self.last_folder_label = QLabel(self)
         self.error_message = QLabel(self)
 
         # Buttons
@@ -162,6 +164,11 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.selected_folder_label.setGeometry(60, 200, 550 + sfle, 36)
         self.selected_folder_label.setObjectName("selectedFolderLabel")
         self.selected_folder_label.setStyleSheet(label_style)
+
+        self.last_folder_label.setGeometry(60, 300, 550, 36)
+        self.last_folder_label.setStyleSheet(label_style)
+        if ds.last_folder_name:
+            self.last_folder_label.setText(f"Zuletzt abgeschlossen: {ds.last_folder_name}")
 
         self.browse_button.setGeometry(631, 200, 190, 36)
         self.browse_button.setStyleSheet(label_style)
@@ -880,12 +887,32 @@ def show_errors(errors: list):
     msg.setWindowTitle("Error")
     sys.exit(msg.exec_())
 
+def get_last_folder_name() -> str:
+    """
+    look in parent folder for `status.json`
+    """
+
+    parent = os.path.dirname(os.path.abspath(ds.path))
+    json_path = os.path.join(parent, "status.json")
+
+    import json
+    try:
+        with open(json_path) as fp:
+            status_dict = json.load(fp)
+    except Exception as ex:
+        print(ex)
+        return None
+
+    return status_dict["last_completed_folder"]
+
+
 
 if __name__ == '__main__':
     # run the application
     handle_cli_data_folder(sys.argv)
     if ds.cli_errors:
         show_errors(ds.cli_errors)
+    ds.last_folder_name = get_last_folder_name()
     app = QApplication(sys.argv)
     ex = SetupWindow()
     ex.show()
