@@ -50,6 +50,7 @@ def make_folder(directory):
 
 # global data storage:
 ds = confloader.Container()
+ds.path_specified_via_cli = None
 
 
 class SetupWindow(QWidget, confloader.Confloader):
@@ -140,6 +141,7 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.setWindowTitle('PyQt5 - Annotation tool - Parameters setup')
         self.setGeometry(0, 0, self.width, self.height)
         self.centerOnScreen()
+        sfle = 200 if ds.path_specified_via_cli else 0
 
 
         self.button_style = "color: black; font-size: 18pt;"
@@ -157,13 +159,15 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.headline_folder.setObjectName("headline")
         self.headline_folder.setStyleSheet(label_style)
 
-        self.selected_folder_label.setGeometry(60, 200, 550, 36)
+        self.selected_folder_label.setGeometry(60, 200, 550 + sfle, 36)
         self.selected_folder_label.setObjectName("selectedFolderLabel")
         self.selected_folder_label.setStyleSheet(label_style)
 
         self.browse_button.setGeometry(631, 200, 190, 36)
         self.browse_button.setStyleSheet(label_style)
         self.browse_button.clicked.connect(self.pick_new)
+        if ds.path_specified_via_cli:
+            self.browse_button.hide()
 
         # Input number of labels
         top_margin_num_labels = 260
@@ -852,6 +856,7 @@ def handle_cli_data_folder(sys_argv: list):
     if "--data" in sys_argv:
         idx1 = sys_argv.index("--data")
         sys_argv.pop(idx1)
+        ds.path_specified_via_cli = None
         try:
             ds.path = sys_argv.pop(idx1)
         except IndexError:
@@ -859,6 +864,7 @@ def handle_cli_data_folder(sys_argv: list):
             ds.path = None
         if ds.path and os.path.isdir(ds.path):
             fallback = False
+            ds.path_specified_via_cli = True
         else:
             ds.cli_errors.append(f"Could not find path: {ds.path}")
     if fallback:
