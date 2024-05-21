@@ -52,6 +52,7 @@ def make_folder(directory):
 ds = confloader.Container()
 ds.path_specified_via_cli = None
 ds.last_folder_name = None
+STATUS_JSON_NAME = "status.json"
 
 
 class SetupWindow(QWidget, confloader.Confloader):
@@ -777,6 +778,8 @@ class LabelerWindow(QWidget):
         self.csv_generated_message.setText(message)
         print(message)
 
+        save_last_folder_to_json(self.input_folder)
+
         if 0 and self.generate_xlsx_checkbox.isChecked():
             try:
                 self.csv_to_xlsx(csv_file_path)
@@ -887,15 +890,28 @@ def show_errors(errors: list):
     msg.setWindowTitle("Error")
     sys.exit(msg.exec_())
 
+def save_last_folder_to_json(path):
+    parent = os.path.dirname(os.path.abspath(path))
+    json_path = os.path.join(parent, STATUS_JSON_NAME)
+
+    dirname = os.path.split(os.path.abspath(path))[-1]
+    status_dict = {"last_completed_folder": dirname}
+    try:
+        with open(json_path, "w") as fp:
+            json.dump(status_dict, fp)
+    except Exception as ex:
+        print(ex)
+        raise
+
+
 def get_last_folder_name() -> str:
     """
     look in parent folder for `status.json`
     """
 
     parent = os.path.dirname(os.path.abspath(ds.path))
-    json_path = os.path.join(parent, "status.json")
+    json_path = os.path.join(parent, STATUS_JSON_NAME)
 
-    import json
     try:
         with open(json_path) as fp:
             status_dict = json.load(fp)
