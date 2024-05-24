@@ -76,7 +76,7 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.mode = 'csv'  # default option
 
         # Labels
-        self.username = QLabel('1. Name eingeben', self)
+        self.username = QLabel('1. Nutzername eingeben', self)
         self.headline_folder = QLabel('2. Ordner auswählen', self)
         # self.headline_num_labels = QLabel('3. Specify labels', self)
         # self.labels_file_description = QLabel(
@@ -87,6 +87,8 @@ class SetupWindow(QWidget, confloader.Confloader):
 
         self.selected_folder_label = QLabel(self)
         self.last_folder_label = QLabel(self)
+        self.last_user_label = QLabel(self)
+        self.last_timestamp_label = QLabel(self)
         self.error_message = QLabel(self)
 
         # Buttons
@@ -155,7 +157,7 @@ class SetupWindow(QWidget, confloader.Confloader):
 
         self.username.setGeometry(60, 30, 400, 35)
         self.username.setStyleSheet(label_style)
-        self.nameInput.setGeometry(60, 70, 550, 36)
+        self.nameInput.setGeometry(60, 70, 550 + sfle, 36)
         self.nameInput.setStyleSheet(label_style)
 
         self.headline_folder.setGeometry(60, 150, 500, 20)
@@ -167,9 +169,19 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.selected_folder_label.setStyleSheet(label_style)
 
         self.last_folder_label.setGeometry(60, 300, 550, 36)
-        self.last_folder_label.setStyleSheet(label_style)
-        if ds.last_folder_name:
-            self.last_folder_label.setText(f"Zuletzt abgeschlossen: {ds.last_folder_name}")
+        # self.last_folder_label.setStyleSheet(label_style)
+
+        self.last_user_label.setGeometry(60, 350, 550, 36)
+        # self.last_user_label.setStyleSheet(label_style)
+
+        self.last_timestamp_label.setGeometry(60, 400, 550, 36)
+        # self.last_timestamp_label.setStyleSheet(label_style)
+
+        if ds.last_metadata:
+            timestamp = ds.last_metadata["timestamp_save"]
+            self.last_folder_label.setText(f"Zuletzt abgeschlossen: {ds.last_metadata['last_completed_folder']}")
+            self.last_user_label.setText(f"von: {ds.last_metadata['username']}")
+            self.last_timestamp_label.setText(f"Zeitstempel: {timestamp}")
 
         self.browse_button.setGeometry(631, 200, 190, 36)
         self.browse_button.setStyleSheet(label_style)
@@ -414,6 +426,7 @@ class LabelerWindow(QWidget):
     def __init__(self, labels, input_folder, username):
         self.username = username
         self.timestamp_start = time.strftime("%Y-%m-%d %H:%M:%S")
+        self.last_img_reached = False
         mode = "csv"
         super().__init__()
 
@@ -424,7 +437,11 @@ class LabelerWindow(QWidget):
 
 
         self.button_style = "color: black; font-size: 18pt;"
-        self.button_style_white = "color: white; font-size: 18pt;"
+        # self.button_style_white = "color: white; font-size: 18pt;"
+
+        self.button_style_white_bg_gray = "color: white; font-size: 18pt; background-color: #999;"
+        self.button_style_white_bg_blue = "color: white; font-size: 18pt; background-color: #1E88E5;"
+
         self.label_style_red18 = 'color: red; font-weight: bold; font-size: 18pt;'
 
         zoom = 1.0
@@ -548,11 +565,11 @@ class LabelerWindow(QWidget):
         next_im_kbs.activated.connect(self.show_next_image)
 
         # Add "generate csv file" button
-        save_res_btn = QtWidgets.QPushButton("CSV speichern", self)
-        save_res_btn.move(self.img_panel_width + 20, 750)
-        save_res_btn.clicked.connect(lambda state, filename='assigned_classes': self.generate_csv(filename))
-        save_res_btn.setObjectName("blueButton")
-        save_res_btn.setStyleSheet(self.button_style_white)
+        self.save_res_btn = QtWidgets.QPushButton("CSV speichern", self)
+        self.save_res_btn.setGeometry(self.img_panel_width + 20, 750, 500, 50)
+        self.save_res_btn.clicked.connect(lambda state, filename='assigned_classes': self.generate_csv(filename))
+        self.save_res_btn.setObjectName("blueButton")
+        self.save_res_btn.setStyleSheet(self.button_style_white_bg_gray)
 
         self.last_img_hint.setGeometry(self.img_panel_width + 20, 650, 650, 30)
         self.last_img_hint.setStyleSheet(self.label_style_red18)
@@ -677,7 +694,6 @@ class LabelerWindow(QWidget):
 
         path = self.img_paths[self.counter]
         filename = os.path.split(path)[-1]
-        print("{filename=}")
 
         self.set_image(path)
         self.img_name_label.setText(path)
@@ -691,7 +707,10 @@ class LabelerWindow(QWidget):
 
         # if this is the last image in dataset
         if self.counter == self.num_images - 1:
+            self.last_img_reached = True
             self.last_img_hint.setText("Letztes Bild erreicht. Bitte CSV-Datei speichern.")
+            self.save_res_btn.setStyleSheet(self.button_style_white_bg_blue)
+            self.save_res_btn.setText("CSV speichern und beenden")
 
             # change button color (make choice visible)
             path = self.img_paths[self.counter]
@@ -767,6 +786,7 @@ class LabelerWindow(QWidget):
         metadata_path = os.path.join(path_to_save, "metadata.json")
 
         metadata = {
+            "last_completed_folder": self.input_folder,
             "username": self.username,
             "timestamp_start": self.timestamp_start,
             "timestamp_save": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -778,13 +798,31 @@ class LabelerWindow(QWidget):
         self.csv_generated_message.setText(message)
         print(message)
 
-        save_last_folder_to_json(self.input_folder)
+        # also save the metadata in parent folder to easily display it on setup window
+        self.save_metadata_to_parent_folder(metadata)
+        if self.last_img_reached:
+            self.close()
 
         if 0 and self.generate_xlsx_checkbox.isChecked():
             try:
                 self.csv_to_xlsx(csv_file_path)
             except:
                 print('Generating xlsx file failed.')
+
+    def save_metadata_to_parent_folder(self, metadata):
+        assert isinstance(metadata, dict)
+        parent = os.path.dirname(os.path.abspath(self.input_folder))
+        json_path = os.path.join(parent, STATUS_JSON_NAME)
+
+        dirname = os.path.split(os.path.abspath(self.input_folder))[-1]
+        try:
+            with open(json_path, "w") as fp:
+                json.dump(metadata, fp)
+        except Exception as ex:
+            print(ex)
+            raise
+
+
 
     def csv_to_xlsx(self, csv_file_path):
         """
@@ -890,21 +928,8 @@ def show_errors(errors: list):
     msg.setWindowTitle("Error")
     sys.exit(msg.exec_())
 
-def save_last_folder_to_json(path):
-    parent = os.path.dirname(os.path.abspath(path))
-    json_path = os.path.join(parent, STATUS_JSON_NAME)
 
-    dirname = os.path.split(os.path.abspath(path))[-1]
-    status_dict = {"last_completed_folder": dirname}
-    try:
-        with open(json_path, "w") as fp:
-            json.dump(status_dict, fp)
-    except Exception as ex:
-        print(ex)
-        raise
-
-
-def get_last_folder_name() -> str:
+def get_metadata() -> dict:
     """
     look in parent folder for `status.json`
     """
@@ -914,12 +939,12 @@ def get_last_folder_name() -> str:
 
     try:
         with open(json_path) as fp:
-            status_dict = json.load(fp)
+            metadata_dict = json.load(fp)
     except Exception as ex:
         print(ex)
         return None
 
-    return status_dict["last_completed_folder"]
+    return metadata_dict
 
 
 
@@ -928,7 +953,9 @@ if __name__ == '__main__':
     handle_cli_data_folder(sys.argv)
     if ds.cli_errors:
         show_errors(ds.cli_errors)
-    ds.last_folder_name = get_last_folder_name()
+
+    ds.last_metadata = get_metadata()
+    # metadata_dict["last_completed_folder"]
     app = QApplication(sys.argv)
     ex = SetupWindow()
     ex.show()
