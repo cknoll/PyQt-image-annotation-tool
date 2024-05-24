@@ -178,9 +178,9 @@ class SetupWindow(QWidget, confloader.Confloader):
         # self.last_timestamp_label.setStyleSheet(label_style)
 
         if ds.last_metadata:
-            timestamp = ds.last_metadata["timestamp_save"]
-            self.last_folder_label.setText(f"Zuletzt abgeschlossen: {ds.last_metadata['last_completed_folder']}")
-            self.last_user_label.setText(f"von: {ds.last_metadata['username']}")
+            timestamp = ds.last_metadata.get("timestamp_save")
+            self.last_folder_label.setText(f"Zuletzt abgeschlossen: {ds.last_metadata.get('last_completed_folder')}")
+            self.last_user_label.setText(f"von: {ds.last_metadata.get('username')}")
             self.last_timestamp_label.setText(f"Zeitstempel: {timestamp}")
 
         self.browse_button.setGeometry(631, 200, 190, 36)
