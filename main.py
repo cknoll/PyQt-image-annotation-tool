@@ -547,12 +547,12 @@ class LabelerWindow(QWidget):
 
         # Add "Prev Image" and "Next Image" buttons
         next_prev_top_margin = 50
-        prev_im_btn = QtWidgets.QPushButton("Prev", self)
+        prev_im_btn = QtWidgets.QPushButton("←", self)
         prev_im_btn.move(self.img_panel_width + 20, next_prev_top_margin)
         prev_im_btn.clicked.connect(self.show_prev_image)
         prev_im_btn.setStyleSheet(self.button_style)
 
-        next_im_btn = QtWidgets.QPushButton("Next", self)
+        next_im_btn = QtWidgets.QPushButton("→", self)
         next_im_btn.move(self.img_panel_width + 140, next_prev_top_margin)
         next_im_btn.clicked.connect(self.show_next_image)
         next_im_btn.setStyleSheet(self.button_style)
