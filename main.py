@@ -76,8 +76,8 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.mode = 'csv'  # default option
 
         # Labels
-        self.username = QLabel('1. Nutzername eingeben', self)
-        self.headline_folder = QLabel('2. Ordner auswählen', self)
+        self.username = QLabel('Nutzername eingeben', self)
+        self.headline_folder = QLabel('Ausgewählter Ordner:', self)
         # self.headline_num_labels = QLabel('3. Specify labels', self)
         # self.labels_file_description = QLabel(
         #     'a) select file with labels (text file containing one label on each line)', self)
@@ -146,6 +146,8 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.setWindowTitle('PyQt5 - Annotation tool - Parameters setup')
         self.setGeometry(0, 0, self.width, self.height)
         self.centerOnScreen()
+
+        # add selected folder label extra space if necessary
         sfle = 200 if ds.path_specified_via_cli else 0
 
 
@@ -160,12 +162,17 @@ class SetupWindow(QWidget, confloader.Confloader):
         self.nameInput.setGeometry(60, 70, 550 + sfle, 36)
         self.nameInput.setStyleSheet(label_style)
 
-        self.headline_folder.setGeometry(60, 150, 500, 20)
+        self.headline_folder.setGeometry(60, 150, 500, 36)
         self.headline_folder.setObjectName("headline")
         self.headline_folder.setStyleSheet(label_style)
 
         self.selected_folder_label.setGeometry(60, 200, 550 + sfle, 36)
-        self.selected_folder_label.setObjectName("selectedFolderLabel")
+        if ds.path_specified_via_cli:
+            # read only: no special background via css
+            self.selected_folder_label.setObjectName("selectedFolderLabelRO")
+        else:
+            # white background via css
+            self.selected_folder_label.setObjectName("selectedFolderLabel")
         self.selected_folder_label.setStyleSheet(label_style)
 
         self.last_folder_label.setGeometry(60, 300, 550, 36)
@@ -313,6 +320,9 @@ class SetupWindow(QWidget, confloader.Confloader):
         """
         shows a dialog to choose folder with images to label
         """
+        if ds.path_specified_via_cli:
+            # this should never be called -> leave the function anyway
+            return
         dialog = QFileDialog()
         folder_path = dialog.getExistingDirectory(None, "Select Folder")
 
@@ -473,7 +483,7 @@ class LabelerWindow(QWidget):
         self.img_name_label = QLabel(self)
         self.progress_bar = QLabel(self)
         self.curr_image_headline = QLabel(f"Nutzer: {self.username}", self)
-        self.csv_note = QLabel('Bitte auch Fehler benennen, die leicht auffällig sind, aber nicht\nausgeschleust werden müssten.\n\nWenn keine Auffälligkeit zu sehen ist, dann keine Fehlerklasse markieren.', self)
+        self.csv_note = QLabel('Bitte auch Fehler markieren, die leicht auffällig sind, aber nicht\nausgeschleust werden müssten.', self)
         self.csv_generated_message = QLabel(self) # will contain "csv saved to ..."
         self.show_next_checkbox = QCheckBox("Automatisch nächstes Bild anzeigen nach dem Annotieren", self)
         # self.generate_xlsx_checkbox = QCheckBox("Also generate .xlsx file", self)
@@ -498,6 +508,10 @@ class LabelerWindow(QWidget):
         self.show_next_checkbox.setChecked(False)
         self.show_next_checkbox.setGeometry(self.img_panel_width + 20, 10, 550, 20)
 
+        if ds.path_specified_via_cli:
+            # in simplified mode we do not want to have this widget
+            self.show_next_checkbox.hide()
+
         # "create xlsx" checkbox
         # self.generate_xlsx_checkbox.setChecked(False)
         # self.generate_xlsx_checkbox.setGeometry(self.img_panel_width + 140, 606, 300, 20)
@@ -513,10 +527,10 @@ class LabelerWindow(QWidget):
         self.progress_bar.setGeometry(20, 65, self.img_panel_width, 20)
 
         # csv note
-        self.csv_note.setGeometry(self.img_panel_width + 20, 540, 560, 80)
+        self.csv_note.setGeometry(self.img_panel_width + 20, 570, 560, 80)
 
         # message that csv was generated
-        self.csv_generated_message.setGeometry(self.img_panel_width + 20, 700, 600, 40)
+        self.csv_generated_message.setGeometry(self.img_panel_width + 20, 740, 600, 40)
         self.csv_generated_message.setStyleSheet('color: #43A047')
 
         # show image
@@ -565,13 +579,13 @@ class LabelerWindow(QWidget):
         next_im_kbs.activated.connect(self.show_next_image)
 
         # Add "generate csv file" button
-        self.save_res_btn = QtWidgets.QPushButton("CSV speichern", self)
+        self.save_res_btn = QtWidgets.QPushButton("Bisherige Ergebnisse speichern", self)
         self.save_res_btn.setGeometry(self.img_panel_width + 20, 750, 500, 50)
         self.save_res_btn.clicked.connect(lambda state, filename='assigned_classes': self.generate_csv(filename))
         self.save_res_btn.setObjectName("blueButton")
         self.save_res_btn.setStyleSheet(self.button_style_white_bg_gray)
 
-        self.last_img_hint.setGeometry(self.img_panel_width + 20, 650, 650, 30)
+        self.last_img_hint.setGeometry(self.img_panel_width + 20, 680, 650, 30)
         self.last_img_hint.setStyleSheet(self.label_style_red18)
 
         # Create button for each label
@@ -708,9 +722,9 @@ class LabelerWindow(QWidget):
         # if this is the last image in dataset
         if self.counter == self.num_images - 1:
             self.last_img_reached = True
-            self.last_img_hint.setText("Letztes Bild erreicht. Bitte CSV-Datei speichern.")
+            self.last_img_hint.setText("Letztes Bild erreicht. Bitte Ergebnisse speichern.")
             self.save_res_btn.setStyleSheet(self.button_style_white_bg_blue)
-            self.save_res_btn.setText("CSV speichern und beenden")
+            self.save_res_btn.setText("Ergebnisse speichern")
 
             # change button color (make choice visible)
             path = self.img_paths[self.counter]
@@ -762,7 +776,7 @@ class LabelerWindow(QWidget):
 
         self.image_box.setPixmap(pixmap)
 
-    def generate_csv(self, out_filename):
+    def generate_csv(self, out_filename, autosave=False):
         """
         Generates and saves csv file with assigned labels.
         Assigned label is represented as one-hot vector.
@@ -798,10 +812,13 @@ class LabelerWindow(QWidget):
         self.csv_generated_message.setText(message)
         print(message)
 
-        # also save the metadata in parent folder to easily display it on setup window
-        self.save_metadata_to_parent_folder(metadata)
-        if self.last_img_reached:
-            self.close()
+
+        if not autosave:
+            # only executed when the "save csv" button was pressed
+            # also save the metadata in parent folder to easily display it on setup window
+            self.save_metadata_to_parent_folder(metadata)
+            if self.last_img_reached:
+                self.close()
 
         if 0 and self.generate_xlsx_checkbox.isChecked():
             try:
@@ -864,7 +881,7 @@ class LabelerWindow(QWidget):
         It automatically generates csv file in case the user forgot to do that
         """
         print("closing the App..")
-        self.generate_csv('assigned_classes_automatically_generated')
+        self.generate_csv('assigned_classes_automatically_generated', autosave=True)
 
     def labels_to_zero_one(self, labels):
         """

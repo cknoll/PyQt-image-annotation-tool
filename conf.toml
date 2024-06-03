@@ -17,6 +17,7 @@ label_headlines = [
     "Bläschen",
     "Füllung über Rand hinaus",
     "Kratzer/Späne auf Deckel ",
-    "Zelle falsch erkannt",
+    "Stäbchen falsch erkannt",
     "sonstiger Fehler",
+    "kein Fehler",
 ]
